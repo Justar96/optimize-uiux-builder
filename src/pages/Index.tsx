@@ -16,6 +16,7 @@ type Message = {
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [showFooterInput, setShowFooterInput] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Scroll to bottom when messages change
@@ -33,6 +34,7 @@ const Index = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    setShowFooterInput(true);
     
     // Simulate AI response
     setIsTyping(true);
@@ -57,7 +59,7 @@ const Index = () => {
       <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
-            <WelcomeScreen onSendMessage={handleSendMessage} />
+            <WelcomeScreen onSendMessage={handleSendMessage} onInputFocus={() => setShowFooterInput(true)} />
           ) : (
             <div className="space-y-6">
               {messages.map((message, index) => (
@@ -95,7 +97,10 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className="p-4 border-t border-chat-border">
+      <footer className={cn(
+        "p-4 border-t border-chat-border transition-all duration-300",
+        showFooterInput ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-10 pointer-events-none"
+      )}>
         <ChatInput onSendMessage={handleSendMessage} />
         
         <div className="max-w-3xl mx-auto mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
@@ -107,7 +112,13 @@ const Index = () => {
   );
 };
 
-const WelcomeScreen = ({ onSendMessage }: { onSendMessage: (message: string) => void }) => {
+const WelcomeScreen = ({ 
+  onSendMessage, 
+  onInputFocus 
+}: { 
+  onSendMessage: (message: string) => void,
+  onInputFocus: () => void 
+}) => {
   return (
     <div className="h-full flex flex-col items-center justify-center">
       <h1 className="text-4xl font-medium text-white mb-16 animate-fade-in">
@@ -117,7 +128,8 @@ const WelcomeScreen = ({ onSendMessage }: { onSendMessage: (message: string) => 
       <div className="w-full">
         <ChatInput 
           onSendMessage={onSendMessage} 
-          className="animate-slide-up" 
+          className="animate-slide-up"
+          onFocus={onInputFocus}
         />
       </div>
     </div>

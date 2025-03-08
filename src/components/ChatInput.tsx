@@ -6,10 +6,11 @@ import OptionsPanel from "./OptionsPanel";
 
 interface ChatInputProps {
   onSendMessage?: (message: string) => void;
+  onFocus?: () => void;
   className?: string;
 }
 
-const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, onFocus, className }: ChatInputProps) => {
   const [message, setMessage] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -34,6 +35,13 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  };
+  
+  const handleFocus = () => {
+    setIsFocused(true);
+    if (onFocus) {
+      onFocus();
     }
   };
   
@@ -67,7 +75,7 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
             ref={textareaRef}
             value={message}
             onChange={handleTextareaChange}
-            onFocus={() => setIsFocused(true)}
+            onFocus={handleFocus}
             onBlur={() => setIsFocused(false)}
             placeholder="Ask anything"
             rows={1}
