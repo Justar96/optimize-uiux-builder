@@ -54,12 +54,12 @@ const Index = () => {
     <div className="flex flex-col h-screen overflow-hidden bg-chat-dark">
       <ChatHeader />
       
-      <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
-        <div className="max-w-3xl mx-auto">
+      <main className="flex-1 overflow-y-auto px-4 py-5 hide-scrollbar">
+        <div className="max-w-2xl mx-auto">
           {messages.length === 0 ? (
-            <WelcomeScreen onSendMessage={handleSendMessage} />
+            <WelcomeScreen />
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {messages.map((message, index) => (
                 <div 
                   key={message.id}
@@ -81,9 +81,9 @@ const Index = () => {
                 <div className="flex justify-start">
                   <MessageBubble isLoading>
                     <div className="flex space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </MessageBubble>
                 </div>
@@ -95,11 +95,11 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className="p-4 border-t border-chat-border">
+      <footer className="p-3 border-t border-chat-border">
         <ChatInput onSendMessage={handleSendMessage} />
         
-        <div className="max-w-3xl mx-auto mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-          <AlertTriangle size={12} />
+        <div className="max-w-2xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+          <AlertTriangle size={10} />
           <span>ChatGPT can make mistakes. Check important info.</span>
         </div>
       </footer>
@@ -107,19 +107,12 @@ const Index = () => {
   );
 };
 
-const WelcomeScreen = ({ onSendMessage }: { onSendMessage: (message: string) => void }) => {
+const WelcomeScreen = () => {
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-medium text-white mb-16 animate-fade-in">
+      <h1 className="text-3xl font-medium text-white mb-12 animate-fade-in">
         What can I help with?
       </h1>
-      
-      <div className="w-full">
-        <ChatInput 
-          onSendMessage={onSendMessage} 
-          className="animate-slide-up" 
-        />
-      </div>
     </div>
   );
 };

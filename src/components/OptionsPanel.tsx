@@ -11,26 +11,26 @@ const OptionsPanel = ({ className }: OptionsPanelProps) => {
   return (
     <div 
       className={cn(
-        "flex flex-wrap items-center gap-2",
+        "flex flex-wrap items-center gap-1.5",
         className
       )}
     >
       <ChipButton 
-        icon={<Search size={16} />}
+        icon={<Search size={14} />}
         animationDelay={100}
       >
         Search
       </ChipButton>
       
       <ChipButton 
-        icon={<Sparkles size={16} />}
+        icon={<Sparkles size={14} />}
         animationDelay={150}
       >
         Deep research
       </ChipButton>
       
       <ChipButton 
-        icon={<Globe size={16} />}
+        icon={<Globe size={14} />}
         variant="ghost"
         animationDelay={200}
         className="opacity-60 hover:opacity-100"

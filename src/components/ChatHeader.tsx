@@ -15,16 +15,16 @@ const ChatHeader = ({
   return (
     <div 
       className={cn(
-        "flex items-center justify-between py-3 px-4 border-b border-chat-border",
+        "flex items-center justify-between py-2 px-3 border-b border-chat-border",
         className
       )}
     >
       <div className="flex items-center gap-2">
-        <Menu size={20} className="text-gray-400 cursor-pointer hover:text-white transition-colors duration-200" />
+        <Menu size={18} className="text-gray-400 cursor-pointer hover:text-white transition-colors duration-200" />
         
-        <button className="flex items-center gap-2 bg-transparent hover:bg-chat-light px-3 py-1.5 rounded-md transition-colors duration-200">
-          <span className="font-medium">{modelName}</span>
-          <ChevronDown size={16} className="text-gray-400" />
+        <button className="flex items-center gap-1.5 bg-transparent hover:bg-chat-light px-2.5 py-1 rounded-md transition-colors duration-200">
+          <span className="font-medium text-sm">{modelName}</span>
+          <ChevronDown size={14} className="text-gray-400" />
         </button>
       </div>
       
