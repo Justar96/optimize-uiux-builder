@@ -59,7 +59,7 @@ const Index = () => {
       <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
-            <WelcomeScreen onSendMessage={handleSendMessage} onInputFocus={() => setShowFooterInput(true)} />
+            <WelcomeScreen onSendMessage={handleSendMessage} />
           ) : (
             <div className="space-y-6">
               {messages.map((message, index) => (
@@ -113,11 +113,9 @@ const Index = () => {
 };
 
 const WelcomeScreen = ({ 
-  onSendMessage, 
-  onInputFocus 
+  onSendMessage
 }: { 
-  onSendMessage: (message: string) => void,
-  onInputFocus: () => void 
+  onSendMessage: (message: string) => void
 }) => {
   return (
     <div className="h-full flex flex-col items-center justify-center">
@@ -129,7 +127,6 @@ const WelcomeScreen = ({
         <ChatInput 
           onSendMessage={onSendMessage} 
           className="animate-slide-up"
-          onFocus={onInputFocus}
         />
       </div>
     </div>
