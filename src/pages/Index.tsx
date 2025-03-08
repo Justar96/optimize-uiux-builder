@@ -34,6 +34,8 @@ const Index = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
+    
+    // Show footer input only after first message is sent
     setShowFooterInput(true);
     
     // Simulate AI response
@@ -97,17 +99,16 @@ const Index = () => {
         </div>
       </main>
       
-      <footer className={cn(
-        "p-4 border-t border-chat-border transition-all duration-300",
-        showFooterInput ? "opacity-100 transform translate-y-0" : "opacity-0 transform translate-y-10 pointer-events-none"
-      )}>
-        <ChatInput onSendMessage={handleSendMessage} />
-        
-        <div className="max-w-3xl mx-auto mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-          <AlertTriangle size={12} />
-          <span>ChatGPT can make mistakes. Check important info.</span>
-        </div>
-      </footer>
+      {showFooterInput && (
+        <footer className="p-4 border-t border-chat-border">
+          <ChatInput onSendMessage={handleSendMessage} />
+          
+          <div className="max-w-3xl mx-auto mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+            <AlertTriangle size={12} />
+            <span>ChatGPT can make mistakes. Check important info.</span>
+          </div>
+        </footer>
+      )}
     </div>
   );
 };
