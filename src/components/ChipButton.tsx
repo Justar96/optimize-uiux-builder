@@ -26,7 +26,7 @@ const ChipButton = forwardRef<HTMLButtonElement, ChipButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full transition-colors duration-300",
+          "inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full transition-colors duration-300",
           variant === "default" ? 
             "bg-chat-input border border-chat-border hover:bg-chat-highlight" : 
             "bg-transparent hover:bg-chat-input/40",
@@ -35,7 +35,7 @@ const ChipButton = forwardRef<HTMLButtonElement, ChipButtonProps>(
         )}
         {...props}
       >
-        <div ref={animationRef} className="flex items-center gap-1.5">
+        <div ref={animationRef} className="flex items-center gap-2">
           {icon && <span className="flex-shrink-0">{icon}</span>}
           {children}
         </div>

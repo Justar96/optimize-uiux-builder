@@ -24,7 +24,7 @@ const MessageBubble = ({
     <div 
       ref={animationRef}
       className={cn(
-        "rounded-xl p-3 max-w-2xl text-sm",
+        "rounded-2xl p-4 max-w-3xl",
         isUser ? "bg-blue-600 text-white" : "bg-chat-light text-white",
         isLoading && "animate-pulse-subtle",
         className
