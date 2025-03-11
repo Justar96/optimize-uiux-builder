@@ -1,20 +1,16 @@
 
-import { ChevronDown, Menu, PanelRightClose, PanelRight } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import Avatar from "./Avatar";
 import { cn } from "@/lib/utils";
 
 interface ChatHeaderProps {
   modelName?: string;
   className?: string;
-  showArtifact?: boolean;
-  onToggleArtifact?: () => void;
 }
 
 const ChatHeader = ({ 
   modelName = "ChatGPT 4o", 
-  className,
-  showArtifact = false,
-  onToggleArtifact
+  className 
 }: ChatHeaderProps) => {
   return (
     <div 
@@ -32,27 +28,11 @@ const ChatHeader = ({
         </button>
       </div>
       
-      <div className="flex items-center gap-3">
-        {onToggleArtifact && (
-          <button 
-            onClick={onToggleArtifact}
-            className="p-1.5 rounded-md hover:bg-chat-light transition-colors duration-200"
-            aria-label={showArtifact ? "Hide information panel" : "Show information panel"}
-          >
-            {showArtifact ? (
-              <PanelRightClose size={18} className="text-gray-400 hover:text-white" />
-            ) : (
-              <PanelRight size={18} className="text-gray-400 hover:text-white" />
-            )}
-          </button>
-        )}
-        
-        <Avatar 
-          initial="MA" 
-          color="bg-purple-700" 
-          size="sm" 
-        />
-      </div>
+      <Avatar 
+        initial="MA" 
+        color="bg-purple-700" 
+        size="sm" 
+      />
     </div>
   );
 };
