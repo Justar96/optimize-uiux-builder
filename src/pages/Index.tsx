@@ -114,7 +114,7 @@ const Index = () => {
     <div className="flex h-screen overflow-hidden bg-chat-dark">
       <div className={cn(
         "flex flex-col flex-1 h-full overflow-hidden transition-all duration-300",
-        showArtifact ? "w-2/3" : "w-full"
+        showArtifact ? "w-1/2" : "w-full"
       )}>
         <ChatHeader 
           onToggleArtifact={toggleArtifactPanel}
@@ -175,7 +175,7 @@ const Index = () => {
       </div>
       
       {showArtifact && (
-        <div className="w-1/3 h-full">
+        <div className="w-1/2 h-full">
           <ArtifactPanel 
             artifactTitle={artifactContent.title}
             artifactContent={artifactContent.content}
