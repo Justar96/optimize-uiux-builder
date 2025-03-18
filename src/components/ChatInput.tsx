@@ -47,8 +47,10 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
       <form 
         onSubmit={handleSubmit}
         className={cn(
-          "relative rounded-2xl border bg-chat-input border-chat-border transition-all duration-500 overflow-hidden",
-          isFocused ? "shadow-lg border-gray-500" : ""
+          "relative rounded-2xl border bg-chat-input shadow-lg backdrop-blur-sm transition-all duration-500 overflow-hidden",
+          isFocused 
+            ? "border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transform -translate-y-1" 
+            : "border-chat-border shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:transform hover:-translate-y-0.5"
         )}
       >
         {isFocused && (
@@ -88,7 +90,7 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
               className={cn(
                 "flex-shrink-0 p-2 rounded-full transition-all duration-200",
                 message.trim() 
-                  ? "bg-blue-600 text-white hover:bg-blue-700" 
+                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" 
                   : "text-gray-500 cursor-not-allowed"
               )}
             >

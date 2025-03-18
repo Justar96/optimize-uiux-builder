@@ -100,10 +100,12 @@ const Index = () => {
       </main>
       
       {showFooterInput && (
-        <footer className="p-4 border-t border-chat-border">
-          <ChatInput onSendMessage={handleSendMessage} />
+        <footer className="p-4 pb-6">
+          <div className="transform translate-y-2">
+            <ChatInput onSendMessage={handleSendMessage} />
+          </div>
           
-          <div className="max-w-3xl mx-auto mt-4 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+          <div className="max-w-3xl mx-auto mt-6 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
             <AlertTriangle size={12} />
             <span>ChatGPT can make mistakes. Check important info.</span>
           </div>
@@ -124,7 +126,7 @@ const WelcomeScreen = ({
         What can I help with?
       </h1>
       
-      <div className="w-full">
+      <div className="w-full transform hover:scale-[1.01] transition-transform duration-200">
         <ChatInput 
           onSendMessage={onSendMessage} 
           className="animate-slide-up"
