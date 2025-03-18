@@ -100,7 +100,7 @@ const Index = () => {
       </main>
       
       {showFooterInput && (
-        <footer className="p-4 pb-5 bg-chat-dark/80 backdrop-blur-sm">
+        <footer className="p-4 pb-5 bg-gradient-to-t from-chat-dark to-chat-dark/95 backdrop-blur-sm">
           <ChatInput onSendMessage={handleSendMessage} />
           
           <div className="max-w-3xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
