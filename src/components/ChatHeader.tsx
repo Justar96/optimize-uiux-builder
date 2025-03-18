@@ -15,7 +15,7 @@ const ChatHeader = ({
   return (
     <div 
       className={cn(
-        "flex items-center justify-between py-3 px-4 border-b border-chat-border",
+        "flex items-center justify-between py-3 px-4",
         className
       )}
     >
