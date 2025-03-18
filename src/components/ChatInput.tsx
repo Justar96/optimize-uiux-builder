@@ -40,21 +40,19 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
   return (
     <div 
       className={cn(
-        "w-full max-w-3xl mx-auto transition-all duration-300",
+        "w-full max-w-3xl mx-auto",
         className
       )}
     >
       <form 
         onSubmit={handleSubmit}
         className={cn(
-          "relative rounded-2xl border bg-chat-input shadow-lg backdrop-blur-sm transition-all duration-500 overflow-hidden",
-          isFocused 
-            ? "border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transform -translate-y-1" 
-            : "border-chat-border shadow-[0_4px_12px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.15)] hover:transform hover:-translate-y-0.5"
+          "relative rounded-2xl border bg-chat-input border-chat-border shadow-md transition-all overflow-hidden",
+          isFocused && "border-blue-500"
         )}
       >
         {isFocused && (
-          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-stretch origin-left" />
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-500" />
         )}
         
         <div className="flex items-end p-3">
@@ -88,9 +86,9 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
               type="submit" 
               disabled={!message.trim()}
               className={cn(
-                "flex-shrink-0 p-2 rounded-full transition-all duration-200",
+                "flex-shrink-0 p-2 rounded-full transition-colors",
                 message.trim() 
-                  ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg" 
+                  ? "bg-blue-600 text-white hover:bg-blue-700" 
                   : "text-gray-500 cursor-not-allowed"
               )}
             >
@@ -100,7 +98,7 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
         </div>
       </form>
       
-      <div className="mt-4 flex justify-center">
+      <div className="mt-3">
         <OptionsPanel />
       </div>
     </div>

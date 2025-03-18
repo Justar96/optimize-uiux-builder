@@ -63,7 +63,7 @@ const Index = () => {
           {messages.length === 0 ? (
             <WelcomeScreen onSendMessage={handleSendMessage} />
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {messages.map((message, index) => (
                 <div 
                   key={message.id}
@@ -100,12 +100,10 @@ const Index = () => {
       </main>
       
       {showFooterInput && (
-        <footer className="p-4 pb-6">
-          <div className="transform translate-y-2">
-            <ChatInput onSendMessage={handleSendMessage} />
-          </div>
+        <footer className="p-4 pb-5 border-t border-chat-border/30 bg-chat-dark/80 backdrop-blur-sm">
+          <ChatInput onSendMessage={handleSendMessage} />
           
-          <div className="max-w-3xl mx-auto mt-6 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+          <div className="max-w-3xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
             <AlertTriangle size={12} />
             <span>ChatGPT can make mistakes. Check important info.</span>
           </div>
@@ -122,14 +120,14 @@ const WelcomeScreen = ({
 }) => {
   return (
     <div className="h-full flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-medium text-white mb-16 animate-fade-in">
+      <h1 className="text-4xl font-medium text-white mb-12 animate-fade-in">
         What can I help with?
       </h1>
       
-      <div className="w-full transform hover:scale-[1.01] transition-transform duration-200">
+      <div className="w-full">
         <ChatInput 
           onSendMessage={onSendMessage} 
-          className="animate-slide-up"
+          className="animate-fade-in"
         />
       </div>
     </div>
