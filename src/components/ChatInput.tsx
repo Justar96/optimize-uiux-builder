@@ -54,7 +54,8 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
         <div className="flex items-end p-2.5">
           <button 
             type="button" 
-            className="flex-shrink-0 p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-chat-highlight/30 transition-colors duration-200"
+            className="flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200"
+            aria-label="Add attachment"
           >
             <PlusCircle size={18} />
           </button>
@@ -70,10 +71,11 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
             className="flex-grow px-3 py-2 bg-transparent border-none outline-none resize-none text-white placeholder-gray-400"
           />
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button 
               type="button" 
-              className="flex-shrink-0 p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-chat-highlight/30 transition-colors duration-200"
+              className="flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200"
+              aria-label="Voice input"
             >
               <Mic size={18} />
             </button>
@@ -82,11 +84,12 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
               type="submit" 
               disabled={!message.trim()}
               className={cn(
-                "flex-shrink-0 p-1.5 rounded-lg transition-colors",
+                "flex items-center justify-center h-9 w-9 flex-shrink-0 rounded-md transition-all duration-200",
                 message.trim() 
-                  ? "bg-blue-600 text-white hover:bg-blue-700" 
+                  ? "bg-blue-600 text-white hover:bg-blue-500" 
                   : "bg-chat-highlight/20 text-gray-500 cursor-not-allowed"
               )}
+              aria-label="Send message"
             >
               <SendHorizontal size={18} />
             </button>
