@@ -14,7 +14,7 @@ const ChatHeader = ({ className }: ChatHeaderProps) => {
       <div className="max-w-5xl w-full mx-auto flex items-center justify-between">
         <button 
           onClick={toggleSidebar}
-          className="flex items-center justify-center h-9 w-9 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200"
+          className="flex items-center justify-center h-9 w-9 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 -ml-2"
           aria-label="Toggle sidebar"
           data-state={state}
         >
