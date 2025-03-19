@@ -10,22 +10,22 @@ export const useSidebarAnimation = (isOpen: boolean, delay: number = 0) => {
     if (!element) return;
     
     if (isOpen) {
-      // Animate in
+      // Animate in - smoother transition
       element.style.opacity = '0';
-      element.style.transform = 'translateX(-20px)';
+      element.style.transform = 'translateX(-12px)';
       
       const timer = setTimeout(() => {
-        element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        element.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
         element.style.opacity = '1';
         element.style.transform = 'translateX(0)';
       }, delay);
       
       return () => clearTimeout(timer);
     } else {
-      // Animate out
-      element.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+      // Animate out - quicker transition
+      element.style.transition = 'opacity 0.25s ease-in, transform 0.25s ease-in';
       element.style.opacity = '0';
-      element.style.transform = 'translateX(-20px)';
+      element.style.transform = 'translateX(-12px)';
     }
   }, [isOpen, delay]);
   

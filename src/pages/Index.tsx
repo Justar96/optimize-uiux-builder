@@ -59,8 +59,8 @@ const Index = () => {
   
   return (
     <SidebarProvider>
-      <div className="flex h-screen overflow-hidden bg-chat-dark">
-        <Sidebar>
+      <div className="flex h-screen w-full overflow-hidden bg-chat-dark">
+        <Sidebar variant="floating">
           <SidebarHeader>
             <div className="px-3 py-2">
               <button 
@@ -75,7 +75,7 @@ const Index = () => {
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Chats">
+                <SidebarMenuButton tooltip="Chats" isActive={true}>
                   <MessageSquare />
                   <span>Chats</span>
                 </SidebarMenuButton>
@@ -109,15 +109,15 @@ const Index = () => {
           </SidebarFooter>
         </Sidebar>
         
-        <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark">
           <ChatHeader />
           
-          <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
-            <div className="max-w-3xl mx-auto">
+          <main className="flex-1 overflow-y-auto px-4 py-8 hide-scrollbar">
+            <div className="max-w-4xl mx-auto">
               {messages.length === 0 ? (
                 <WelcomeScreen onSendMessage={handleSendMessage} />
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {messages.map((message, index) => (
                     <div 
                       key={message.id}
@@ -154,10 +154,10 @@ const Index = () => {
           </main>
           
           {showFooterInput && (
-            <footer className="p-4 pb-5 bg-gradient-to-t from-chat-dark to-chat-dark/95 backdrop-blur-sm">
+            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent">
               <ChatInput onSendMessage={handleSendMessage} />
               
-              <div className="max-w-3xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+              <div className="max-w-4xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
                 <AlertTriangle size={12} />
                 <span>ChatGPT can make mistakes. Check important info.</span>
               </div>
@@ -180,7 +180,7 @@ const WelcomeScreen = ({
         What can I help with?
       </h1>
       
-      <div className="w-full">
+      <div className="w-full max-w-lg mx-auto">
         <ChatInput 
           onSendMessage={onSendMessage} 
           className="animate-fade-in"
