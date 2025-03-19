@@ -109,15 +109,15 @@ const Index = () => {
           </SidebarFooter>
         </Sidebar>
         
-        <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark">
+        <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark w-full max-w-full">
           <ChatHeader />
           
-          <main className="flex-1 overflow-y-auto px-4 py-8 hide-scrollbar">
-            <div className="max-w-4xl mx-auto">
+          <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 hide-scrollbar">
+            <div className="max-w-5xl mx-auto w-full">
               {messages.length === 0 ? (
                 <WelcomeScreen onSendMessage={handleSendMessage} />
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   {messages.map((message, index) => (
                     <div 
                       key={message.id}
@@ -154,12 +154,14 @@ const Index = () => {
           </main>
           
           {showFooterInput && (
-            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent">
-              <ChatInput onSendMessage={handleSendMessage} />
-              
-              <div className="max-w-4xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-                <AlertTriangle size={12} />
-                <span>ChatGPT can make mistakes. Check important info.</span>
+            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent sticky bottom-0 z-10">
+              <div className="max-w-5xl mx-auto w-full">
+                <ChatInput onSendMessage={handleSendMessage} />
+                
+                <div className="mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+                  <AlertTriangle size={12} />
+                  <span>ChatGPT can make mistakes. Check important info.</span>
+                </div>
               </div>
             </footer>
           )}
@@ -175,12 +177,12 @@ const WelcomeScreen = ({
   onSendMessage: (message: string) => void
 }) => {
   return (
-    <div className="h-full flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-medium text-white mb-12 animate-fade-in">
+    <div className="h-full flex flex-col items-center justify-center py-12">
+      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-8 sm:mb-12 animate-fade-in">
         What can I help with?
       </h1>
       
-      <div className="w-full max-w-lg mx-auto">
+      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
         <ChatInput 
           onSendMessage={onSendMessage} 
           className="animate-fade-in"
