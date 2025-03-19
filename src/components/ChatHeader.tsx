@@ -1,39 +1,39 @@
 
-import { ChevronDown, Menu } from "lucide-react";
-import Avatar from "./Avatar";
-import { cn } from "@/lib/utils";
+import { Shield, ChevronDown, Menu } from 'lucide-react';
+import { useSidebar } from '@/components/ui/sidebar';
 
 interface ChatHeaderProps {
-  modelName?: string;
   className?: string;
 }
 
-const ChatHeader = ({ 
-  modelName = "ChatGPT 4o", 
-  className 
-}: ChatHeaderProps) => {
+const ChatHeader = ({ className }: ChatHeaderProps) => {
+  const { toggleSidebar } = useSidebar();
+  
   return (
-    <div 
-      className={cn(
-        "flex items-center justify-between py-3 px-4",
-        className
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <Menu size={20} className="text-gray-400 cursor-pointer hover:text-white transition-colors duration-200" />
-        
-        <button className="flex items-center gap-2 bg-transparent hover:bg-chat-light px-3 py-1.5 rounded-md transition-colors duration-200">
-          <span className="font-medium">{modelName}</span>
-          <ChevronDown size={16} className="text-gray-400" />
+    <header className="bg-chat-dark py-3 px-4">
+      <div className="max-w-3xl mx-auto flex items-center justify-between">
+        <button 
+          onClick={toggleSidebar}
+          className="flex items-center justify-center h-9 w-9 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200 md:hidden"
+          aria-label="Toggle sidebar"
+        >
+          <Menu size={20} />
         </button>
+        
+        <div className="flex items-center gap-2">
+          <Shield size={18} className="text-blue-400" />
+          <span className="text-white text-sm font-medium">ChatGPT</span>
+          <div className="flex items-center text-xs px-2 py-0.5 bg-chat-light rounded-full text-gray-300">
+            <span>GPT 4</span>
+            <ChevronDown size={14} className="ml-1" />
+          </div>
+        </div>
+        
+        <div className="w-9">
+          {/* Spacer to maintain centering */}
+        </div>
       </div>
-      
-      <Avatar 
-        initial="MA" 
-        color="bg-purple-700" 
-        size="sm" 
-      />
-    </div>
+    </header>
   );
 };
 

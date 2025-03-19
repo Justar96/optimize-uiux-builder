@@ -5,6 +5,8 @@ import ChatInput from "@/components/ChatInput";
 import MessageBubble from "@/components/MessageBubble";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
+import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
 
 type Message = {
   id: string;
@@ -17,6 +19,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showFooterInput, setShowFooterInput] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Scroll to bottom when messages change
@@ -55,61 +58,114 @@ const Index = () => {
   };
   
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-chat-dark">
-      <ChatHeader />
-      
-      <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
-        <div className="max-w-3xl mx-auto">
-          {messages.length === 0 ? (
-            <WelcomeScreen onSendMessage={handleSendMessage} />
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message, index) => (
-                <div 
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.isUser ? "justify-end" : "justify-start"
-                  )}
+    <SidebarProvider>
+      <div className="flex h-screen overflow-hidden bg-chat-dark">
+        <Sidebar>
+          <SidebarHeader>
+            <div className="px-3 py-2">
+              <button 
+                onClick={() => {}} 
+                className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
+              >
+                <PlusCircle size={16} />
+                <span>New Chat</span>
+              </button>
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Chats">
+                  <MessageSquare />
+                  <span>Chats</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Community">
+                  <Users />
+                  <span>Community</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Settings">
+                  <Settings />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  tooltip={isDarkMode ? "Light Mode" : "Dark Mode"} 
+                  onClick={() => setIsDarkMode(!isDarkMode)}
                 >
-                  <MessageBubble 
-                    isUser={message.isUser}
-                    animationDelay={index * 100}
-                  >
-                    {message.content}
-                  </MessageBubble>
-                </div>
-              ))}
-              
-              {isTyping && (
-                <div className="flex justify-start">
-                  <MessageBubble isLoading>
-                    <div className="flex space-x-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  {isDarkMode ? <Sun /> : <Moon />}
+                  <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+        
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <ChatHeader />
+          
+          <main className="flex-1 overflow-y-auto px-4 py-6 hide-scrollbar">
+            <div className="max-w-3xl mx-auto">
+              {messages.length === 0 ? (
+                <WelcomeScreen onSendMessage={handleSendMessage} />
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message, index) => (
+                    <div 
+                      key={message.id}
+                      className={cn(
+                        "flex",
+                        message.isUser ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <MessageBubble 
+                        isUser={message.isUser}
+                        animationDelay={index * 100}
+                      >
+                        {message.content}
+                      </MessageBubble>
                     </div>
-                  </MessageBubble>
+                  ))}
+                  
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <MessageBubble isLoading>
+                        <div className="flex space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </MessageBubble>
+                    </div>
+                  )}
+                  
+                  <div ref={messagesEndRef} />
                 </div>
               )}
-              
-              <div ref={messagesEndRef} />
             </div>
+          </main>
+          
+          {showFooterInput && (
+            <footer className="p-4 pb-5 bg-gradient-to-t from-chat-dark to-chat-dark/95 backdrop-blur-sm">
+              <ChatInput onSendMessage={handleSendMessage} />
+              
+              <div className="max-w-3xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+                <AlertTriangle size={12} />
+                <span>ChatGPT can make mistakes. Check important info.</span>
+              </div>
+            </footer>
           )}
         </div>
-      </main>
-      
-      {showFooterInput && (
-        <footer className="p-4 pb-5 bg-gradient-to-t from-chat-dark to-chat-dark/95 backdrop-blur-sm">
-          <ChatInput onSendMessage={handleSendMessage} />
-          
-          <div className="max-w-3xl mx-auto mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-            <AlertTriangle size={12} />
-            <span>ChatGPT can make mistakes. Check important info.</span>
-          </div>
-        </footer>
-      )}
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
