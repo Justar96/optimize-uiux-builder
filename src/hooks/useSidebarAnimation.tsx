@@ -10,9 +10,9 @@ export const useSidebarAnimation = (isOpen: boolean, delay: number = 0) => {
     if (!element) return;
     
     if (isOpen) {
-      // Animate in - smoother transition with consistent easing
+      // Animate in - smooth transition with perfect easing
       element.style.opacity = '0';
-      element.style.transform = 'translateX(-8px)';
+      element.style.transform = 'translateX(-6px)';
       
       const timer = setTimeout(() => {
         element.style.transition = 'opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
@@ -22,10 +22,10 @@ export const useSidebarAnimation = (isOpen: boolean, delay: number = 0) => {
       
       return () => clearTimeout(timer);
     } else {
-      // Animate out - quicker and cleaner transition
+      // Animate out - quick and smooth transition
       element.style.transition = 'opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)';
       element.style.opacity = '0';
-      element.style.transform = 'translateX(-8px)';
+      element.style.transform = 'translateX(-6px)';
     }
   }, [isOpen, delay]);
   

@@ -7,7 +7,7 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader = ({ className }: ChatHeaderProps) => {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
   
   return (
     <header className="bg-chat-dark border-b border-white/[0.03] py-3 px-4 sticky top-0 z-10">
@@ -16,6 +16,7 @@ const ChatHeader = ({ className }: ChatHeaderProps) => {
           onClick={toggleSidebar}
           className="flex items-center justify-center h-9 w-9 rounded-md text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all duration-200"
           aria-label="Toggle sidebar"
+          data-state={state}
         >
           <Menu size={20} />
         </button>

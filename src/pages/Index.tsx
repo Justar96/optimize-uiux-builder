@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatInput from "@/components/ChatInput";
@@ -22,13 +21,11 @@ const Index = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
   
   const handleSendMessage = (content: string) => {
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content,
@@ -38,10 +35,8 @@ const Index = () => {
     
     setMessages(prev => [...prev, userMessage]);
     
-    // Show footer input only after first message is sent
     setShowFooterInput(true);
     
-    // Simulate AI response
     setIsTyping(true);
     
     setTimeout(() => {
@@ -58,7 +53,7 @@ const Index = () => {
   };
   
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex h-screen w-full overflow-hidden bg-chat-dark">
         <Sidebar variant="floating">
           <SidebarHeader>
