@@ -37,6 +37,10 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
     }
   };
   
+  const handleSuggestionClick = (suggestion: string) => {
+    onSendMessage?.(suggestion);
+  };
+  
   return (
     <div 
       className={cn(
@@ -98,7 +102,7 @@ const ChatInput = ({ onSendMessage, className }: ChatInputProps) => {
       </form>
       
       <div className="mt-3">
-        <OptionsPanel />
+        <OptionsPanel onSuggestionClick={handleSuggestionClick} />
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatInput from "@/components/ChatInput";
@@ -6,12 +7,14 @@ import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
+import { callOpenAI, executeFunction, ChatMessage, ToolCall } from "@/services/openai";
 
 type Message = {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
+  toolCalls?: ToolCall[];
 };
 
 const Index = () => {
@@ -20,12 +23,13 @@ const Index = () => {
   const [showFooterInput, setShowFooterInput] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
   
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       content,
@@ -34,22 +38,133 @@ const Index = () => {
     };
     
     setMessages(prev => [...prev, userMessage]);
-    
     setShowFooterInput(true);
-    
     setIsTyping(true);
     
-    setTimeout(() => {
-      const aiMessage: Message = {
+    // Add user message to chat history
+    const userChatMessage: ChatMessage = {
+      role: "user",
+      content: content
+    };
+    
+    const updatedChatMessages = [...chatMessages, userChatMessage];
+    setChatMessages(updatedChatMessages);
+    
+    try {
+      // Call OpenAI API
+      const response = await callOpenAI(updatedChatMessages);
+      
+      if (response.type === "content") {
+        // Regular message response
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: response.content,
+          isUser: false,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, aiMessage]);
+        setChatMessages(prev => [...prev, { 
+          role: "assistant", 
+          content: response.content 
+        }]);
+      } 
+      else if (response.type === "tool_calls") {
+        // Function call response
+        const toolCallsMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "I need to get some information to answer that properly.",
+          isUser: false,
+          timestamp: new Date(),
+          toolCalls: response.tool_calls
+        };
+        
+        setMessages(prev => [...prev, toolCallsMessage]);
+        
+        // Add assistant message with tool_calls to chat history
+        const assistantMessage: ChatMessage = {
+          role: "assistant",
+          content: "",
+          tool_call_id: response.tool_calls[0].id
+        };
+        
+        setChatMessages(prev => [...prev, assistantMessage]);
+        
+        // Execute each function call
+        for (const toolCall of response.tool_calls) {
+          if (toolCall.type === "function") {
+            const functionName = toolCall.function.name;
+            const args = JSON.parse(toolCall.function.arguments);
+            
+            // Show function execution message
+            const executingMessage: Message = {
+              id: (Date.now() + 2).toString(),
+              content: `Executing ${functionName}...`,
+              isUser: false,
+              timestamp: new Date()
+            };
+            
+            setMessages(prev => [...prev, executingMessage]);
+            
+            // Execute the function
+            const result = await executeFunction(functionName, args);
+            
+            // Add function result to chat history
+            setChatMessages(prev => [...prev, {
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: result
+            }]);
+            
+            // Get AI's final response that incorporates the function result
+            const finalResponse = await callOpenAI([
+              ...updatedChatMessages,
+              assistantMessage,
+              {
+                role: "tool",
+                tool_call_id: toolCall.id,
+                content: result
+              }
+            ]);
+            
+            if (finalResponse.type === "content") {
+              const finalMessage: Message = {
+                id: (Date.now() + 3).toString(),
+                content: finalResponse.content,
+                isUser: false,
+                timestamp: new Date()
+              };
+              
+              setMessages(prev => prev.filter(m => m.id !== executingMessage.id).concat(finalMessage));
+              
+              // Add AI's final response to chat history
+              setChatMessages(prev => [...prev, {
+                role: "assistant",
+                content: finalResponse.content
+              }]);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error in AI response:", error);
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm an AI assistant designed to provide helpful, accurate, and ethical responses. How can I assist you today?",
+        content: "Sorry, I encountered an error. Please try again later.",
         isUser: false,
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
+  };
+  
+  const handleNewChat = () => {
+    setMessages([]);
+    setChatMessages([]);
+    setShowFooterInput(false);
   };
   
   return (
@@ -59,7 +174,7 @@ const Index = () => {
           <SidebarHeader>
             <div className="px-3 py-2">
               <button 
-                onClick={() => {}} 
+                onClick={handleNewChat} 
                 className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
               >
                 <PlusCircle size={16} />
@@ -126,6 +241,18 @@ const Index = () => {
                         animationDelay={index * 100}
                       >
                         {message.content}
+                        {message.toolCalls && (
+                          <div className="mt-2 text-xs opacity-75">
+                            <div className="font-semibold">Using tools:</div>
+                            <ul className="list-disc pl-4">
+                              {message.toolCalls.map(tool => (
+                                <li key={tool.id}>
+                                  {tool.function.name}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </MessageBubble>
                     </div>
                   ))}
