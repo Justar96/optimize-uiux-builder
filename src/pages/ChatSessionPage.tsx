@@ -130,13 +130,15 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
           timestamp: new Date()
         };
         
+        const assistantChatMessage: ChatMessage = { 
+          role: "assistant", 
+          content: response.content 
+        };
+        
         const finalSession = {
           ...updatedSession,
           messages: [...updatedMessages, aiMessage],
-          chatMessages: [...updatedChatMessages, { 
-            role: "assistant", 
-            content: response.content 
-          }],
+          chatMessages: [...updatedChatMessages, assistantChatMessage],
           title: updatedMessages.length === 1 ? content.substring(0, 30) : updatedSession.title,
           updatedAt: new Date()
         };
@@ -192,20 +194,18 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
             
             const result = await executeFunction(functionName, args);
             
-            const withToolResult = [...updatedChatMessagesWithAssistant, {
+            const toolResultMessage: ChatMessage = {
               role: "tool",
               tool_call_id: toolCall.id,
               content: result
-            }];
+            };
+            
+            const withToolResult = [...updatedChatMessagesWithAssistant, toolResultMessage];
             
             const finalResponse = await callOpenAI([
               ...updatedChatMessages,
               assistantMessage,
-              {
-                role: "tool",
-                tool_call_id: toolCall.id,
-                content: result
-              }
+              toolResultMessage
             ]);
             
             if (finalResponse.type === "content") {
@@ -220,13 +220,15 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
                 m => m.id !== executingMessage.id
               );
               
+              const finalChatMessage: ChatMessage = {
+                role: "assistant",
+                content: finalResponse.content
+              };
+              
               const finalSession = {
                 ...currentSession,
                 messages: [...messagesWithoutExecuting, finalMessage],
-                chatMessages: [...withToolResult, {
-                  role: "assistant",
-                  content: finalResponse.content
-                }],
+                chatMessages: [...withToolResult, finalChatMessage],
                 title: updatedMessages.length === 1 ? content.substring(0, 30) : currentSession.title,
                 updatedAt: new Date()
               };
