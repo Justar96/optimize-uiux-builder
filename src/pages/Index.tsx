@@ -1,160 +1,44 @@
-import { useState, useEffect, useRef } from "react";
-import ChatHeader from "@/components/ChatHeader";
-import ChatInput from "@/components/ChatInput";
-import MessageBubble from "@/components/MessageBubble";
-import { AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
-import { callOpenAI, executeFunction, ChatMessage, ToolCall } from "@/services/openai";
+import { useState } from "react";
 
-type Message = {
+type ChatSession = {
   id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-  toolCalls?: ToolCall[];
+  title: string;
+  updatedAt: Date;
 };
 
 const Index = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const [showFooterInput, setShowFooterInput] = useState(false);
+  const navigate = useNavigate();
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
-  
-  const handleSendMessage = async (content: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content,
-      isUser: true,
-      timestamp: new Date()
-    };
+    // If no sessions, redirect to new chat page
+    const storedSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
     
-    setMessages(prev => [...prev, userMessage]);
-    setShowFooterInput(true);
-    setIsTyping(true);
-    
-    const userChatMessage: ChatMessage = {
-      role: "user",
-      content: content
-    };
-    
-    const updatedChatMessages = [...chatMessages, userChatMessage];
-    setChatMessages(updatedChatMessages);
-    
-    try {
-      const response = await callOpenAI(updatedChatMessages);
-      
-      if (response.type === "content") {
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: response.content,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, aiMessage]);
-        setChatMessages(prev => [...prev, { 
-          role: "assistant", 
-          content: response.content 
-        }]);
-      } 
-      else if (response.type === "tool_calls") {
-        const toolCalls = response.tool_calls as ToolCall[];
-        
-        const toolCallsMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "I need to get some information to answer that properly.",
-          isUser: false,
-          timestamp: new Date(),
-          toolCalls: toolCalls
-        };
-        
-        setMessages(prev => [...prev, toolCallsMessage]);
-        
-        const assistantMessage: ChatMessage = {
-          role: "assistant",
-          content: "",
-          tool_call_id: toolCalls[0].id
-        };
-        
-        setChatMessages(prev => [...prev, assistantMessage]);
-        
-        for (const toolCall of toolCalls) {
-          if (toolCall.type === "function") {
-            const functionName = toolCall.function.name;
-            const args = JSON.parse(toolCall.function.arguments);
-            
-            const executingMessage: Message = {
-              id: (Date.now() + 2).toString(),
-              content: `Executing ${functionName}...`,
-              isUser: false,
-              timestamp: new Date()
-            };
-            
-            setMessages(prev => [...prev, executingMessage]);
-            
-            const result = await executeFunction(functionName, args);
-            
-            setChatMessages(prev => [...prev, {
-              role: "tool",
-              tool_call_id: toolCall.id,
-              content: result
-            }]);
-            
-            const finalResponse = await callOpenAI([
-              ...updatedChatMessages,
-              assistantMessage,
-              {
-                role: "tool",
-                tool_call_id: toolCall.id,
-                content: result
-              }
-            ]);
-            
-            if (finalResponse.type === "content") {
-              const finalMessage: Message = {
-                id: (Date.now() + 3).toString(),
-                content: finalResponse.content,
-                isUser: false,
-                timestamp: new Date()
-              };
-              
-              setMessages(prev => prev.filter(m => m.id !== executingMessage.id).concat(finalMessage));
-              
-              setChatMessages(prev => [...prev, {
-                role: "assistant",
-                content: finalResponse.content
-              }]);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error in AI response:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "Sorry, I encountered an error. Please try again later.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
+    if (storedSessions.length === 0) {
+      navigate('/new');
+      return;
     }
-  };
+    
+    // Sort sessions by updatedAt (most recent first)
+    const sortedSessions = [...storedSessions].sort((a: any, b: any) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+    
+    setSessions(sortedSessions);
+  }, [navigate]);
   
   const handleNewChat = () => {
-    setMessages([]);
-    setChatMessages([]);
-    setShowFooterInput(false);
+    navigate('/new');
+  };
+  
+  const handleOpenChat = (sessionId: string) => {
+    navigate(`/chat/${sessionId}`);
   };
   
   return (
@@ -210,97 +94,51 @@ const Index = () => {
         </Sidebar>
         
         <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark w-full max-w-full">
-          <ChatHeader />
+          <header className="flex items-center justify-between p-4 border-b border-gray-700">
+            <h1 className="text-xl text-white font-medium">Your Conversations</h1>
+            <button 
+              onClick={handleNewChat}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
+            >
+              <PlusCircle size={16} />
+              <span>New Chat</span>
+            </button>
+          </header>
           
-          <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 hide-scrollbar">
-            <div className="max-w-5xl mx-auto w-full">
-              {messages.length === 0 ? (
-                <WelcomeScreen onSendMessage={handleSendMessage} />
+          <main className="flex-1 overflow-y-auto p-4">
+            <div className="max-w-4xl mx-auto">
+              {sessions.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-400">No conversations yet</p>
+                  <button 
+                    onClick={handleNewChat}
+                    className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-4 py-2 text-white"
+                  >
+                    <PlusCircle size={18} />
+                    <span>Start a New Chat</span>
+                  </button>
+                </div>
               ) : (
-                <div className="space-y-5 sm:space-y-6">
-                  {messages.map((message, index) => (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {sessions.map((session) => (
                     <div 
-                      key={message.id}
-                      className={cn(
-                        "flex",
-                        message.isUser ? "justify-end" : "justify-start"
-                      )}
+                      key={session.id} 
+                      className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors"
+                      onClick={() => handleOpenChat(session.id)}
                     >
-                      <MessageBubble 
-                        isUser={message.isUser}
-                        animationDelay={index * 100}
-                      >
-                        {message.content}
-                        {message.toolCalls && (
-                          <div className="mt-2 text-xs opacity-75">
-                            <div className="font-semibold">Using tools:</div>
-                            <ul className="list-disc pl-4">
-                              {message.toolCalls.map(tool => (
-                                <li key={tool.id}>
-                                  {tool.function.name}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </MessageBubble>
+                      <h3 className="text-white font-medium mb-2 truncate">{session.title}</h3>
+                      <p className="text-gray-400 text-sm">
+                        {new Date(session.updatedAt).toLocaleString()}
+                      </p>
                     </div>
                   ))}
-                  
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <MessageBubble isLoading>
-                        <div className="flex space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      </MessageBubble>
-                    </div>
-                  )}
-                  
-                  <div ref={messagesEndRef} />
                 </div>
               )}
             </div>
           </main>
-          
-          {showFooterInput && (
-            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent sticky bottom-0 z-10">
-              <div className="max-w-5xl mx-auto w-full">
-                <ChatInput onSendMessage={handleSendMessage} />
-                
-                <div className="mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
-                  <AlertTriangle size={12} />
-                  <span>ChatGPT can make mistakes. Check important info.</span>
-                </div>
-              </div>
-            </footer>
-          )}
         </div>
       </div>
     </SidebarProvider>
-  );
-};
-
-const WelcomeScreen = ({ 
-  onSendMessage
-}: { 
-  onSendMessage: (message: string) => void
-}) => {
-  return (
-    <div className="h-full flex flex-col items-center justify-center py-12">
-      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-8 sm:mb-12 animate-fade-in">
-        What can I help with?
-      </h1>
-      
-      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-        <ChatInput 
-          onSendMessage={onSendMessage} 
-          className="animate-fade-in"
-        />
-      </div>
-    </div>
   );
 };
 
