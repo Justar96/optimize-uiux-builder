@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatInput from "@/components/ChatInput";
@@ -41,7 +40,6 @@ const Index = () => {
     setShowFooterInput(true);
     setIsTyping(true);
     
-    // Add user message to chat history
     const userChatMessage: ChatMessage = {
       role: "user",
       content: content
@@ -51,11 +49,9 @@ const Index = () => {
     setChatMessages(updatedChatMessages);
     
     try {
-      // Call OpenAI API
       const response = await callOpenAI(updatedChatMessages);
       
       if (response.type === "content") {
-        // Regular message response
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: response.content,
@@ -70,33 +66,31 @@ const Index = () => {
         }]);
       } 
       else if (response.type === "tool_calls") {
-        // Function call response
+        const toolCalls = response.tool_calls as ToolCall[];
+        
         const toolCallsMessage: Message = {
           id: (Date.now() + 1).toString(),
           content: "I need to get some information to answer that properly.",
           isUser: false,
           timestamp: new Date(),
-          toolCalls: response.tool_calls
+          toolCalls: toolCalls
         };
         
         setMessages(prev => [...prev, toolCallsMessage]);
         
-        // Add assistant message with tool_calls to chat history
         const assistantMessage: ChatMessage = {
           role: "assistant",
           content: "",
-          tool_call_id: response.tool_calls[0].id
+          tool_call_id: toolCalls[0].id
         };
         
         setChatMessages(prev => [...prev, assistantMessage]);
         
-        // Execute each function call
-        for (const toolCall of response.tool_calls) {
+        for (const toolCall of toolCalls) {
           if (toolCall.type === "function") {
             const functionName = toolCall.function.name;
             const args = JSON.parse(toolCall.function.arguments);
             
-            // Show function execution message
             const executingMessage: Message = {
               id: (Date.now() + 2).toString(),
               content: `Executing ${functionName}...`,
@@ -106,17 +100,14 @@ const Index = () => {
             
             setMessages(prev => [...prev, executingMessage]);
             
-            // Execute the function
             const result = await executeFunction(functionName, args);
             
-            // Add function result to chat history
             setChatMessages(prev => [...prev, {
               role: "tool",
               tool_call_id: toolCall.id,
               content: result
             }]);
             
-            // Get AI's final response that incorporates the function result
             const finalResponse = await callOpenAI([
               ...updatedChatMessages,
               assistantMessage,
@@ -137,7 +128,6 @@ const Index = () => {
               
               setMessages(prev => prev.filter(m => m.id !== executingMessage.id).concat(finalMessage));
               
-              // Add AI's final response to chat history
               setChatMessages(prev => [...prev, {
                 role: "assistant",
                 content: finalResponse.content

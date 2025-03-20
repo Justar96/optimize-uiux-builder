@@ -95,7 +95,7 @@ export const callOpenAI = async (messages: ChatMessage[], onUpdate?: (content: s
           type: "tool_calls",
           tool_calls: [{
             id: "call_" + Date.now(),
-            type: "function",
+            type: "function" as const, // Explicitly type as literal "function"
             function: {
               name: "get_weather",
               arguments: JSON.stringify({ location })
@@ -113,7 +113,7 @@ export const callOpenAI = async (messages: ChatMessage[], onUpdate?: (content: s
           type: "tool_calls",
           tool_calls: [{
             id: "call_" + Date.now(),
-            type: "function",
+            type: "function" as const, // Explicitly type as literal "function"
             function: {
               name: "search_knowledge_base",
               arguments: JSON.stringify({ query })
