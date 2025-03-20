@@ -1,32 +1,14 @@
 
-import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import ChatHeader from "@/components/ChatHeader";
 import ChatInput from "@/components/ChatInput";
-import MessageBubble from "@/components/MessageBubble";
 import { AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
-import { callOpenAI, executeFunction, ChatMessage, ToolCall } from "@/services/openai";
-
-type Message = {
-  id: string;
-  content: string;
-  isUser: boolean;
-  timestamp: Date;
-  toolCalls?: ToolCall[];
-};
-
-type ChatSession = {
-  id: string;
-  title: string;
-  messages: Message[];
-  chatMessages: ChatMessage[];
-  createdAt: Date;
-  updatedAt: Date;
-};
+import WelcomeScreen from "@/components/WelcomeScreen";
+import MessageList from "@/components/MessageList";
+import { useChatSession } from "@/hooks/useChatSession";
 
 interface ChatSessionPageProps {
   isNew?: boolean;
@@ -34,247 +16,17 @@ interface ChatSessionPageProps {
 
 const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
   const { sessionId } = useParams();
-  const navigate = useNavigate();
-  const [session, setSession] = useState<ChatSession | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Load existing session on mount if not new
-  useEffect(() => {
-    if (!isNew && sessionId) {
-      // Load existing session
-      const sessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
-      const foundSession = sessions.find((s: ChatSession) => s.id === sessionId);
-      
-      if (foundSession) {
-        setSession(foundSession);
-      } else {
-        // Session not found, redirect to home
-        navigate('/');
-      }
-    } else if (isNew) {
-      // For new sessions, we just set a temporary placeholder
-      // The actual session will be created when the user sends their first message
-      setSession({
-        id: "temp-id",
-        title: "New Chat",
-        messages: [],
-        chatMessages: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    }
-  }, [isNew, sessionId, navigate]);
-  
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [session?.messages, isTyping]);
-  
-  const updateSession = (updatedSession: ChatSession) => {
-    setSession(updatedSession);
-    
-    // Update in localStorage
-    const sessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
-    const updatedSessions = sessions.map((s: ChatSession) => 
-      s.id === updatedSession.id ? updatedSession : s
-    );
-    
-    if (!sessions.some((s: ChatSession) => s.id === updatedSession.id)) {
-      updatedSessions.push(updatedSession);
-    }
-    
-    localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
-  };
-  
-  const handleSendMessage = async (content: string) => {
-    if (!session) return;
-    
-    // If this is a new session (temp-id), create a real session first
-    let currentSession = session;
-    if (isNew && session.id === "temp-id") {
-      const newSessionId = uuidv4();
-      currentSession = {
-        ...session,
-        id: newSessionId,
-        title: content.substring(0, 30),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      // Update URL without reloading
-      navigate(`/chat/${newSessionId}`, { replace: true });
-    }
-    
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content,
-      isUser: true,
-      timestamp: new Date()
-    };
-    
-    const userChatMessage: ChatMessage = {
-      role: "user",
-      content: content
-    };
-    
-    const updatedMessages = [...currentSession.messages, userMessage];
-    const updatedChatMessages = [...currentSession.chatMessages, userChatMessage];
-    
-    // Update session
-    const updatedSession = {
-      ...currentSession,
-      messages: updatedMessages,
-      chatMessages: updatedChatMessages,
-      updatedAt: new Date()
-    };
-    
-    updateSession(updatedSession);
-    setIsTyping(true);
-    
-    try {
-      const response = await callOpenAI(updatedChatMessages);
-      
-      if (response.type === "content") {
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: response.content,
-          isUser: false,
-          timestamp: new Date()
-        };
-        
-        const assistantChatMessage: ChatMessage = { 
-          role: "assistant", 
-          content: response.content 
-        };
-        
-        const finalSession = {
-          ...updatedSession,
-          messages: [...updatedMessages, aiMessage],
-          chatMessages: [...updatedChatMessages, assistantChatMessage],
-          title: updatedMessages.length === 1 ? content.substring(0, 30) : updatedSession.title,
-          updatedAt: new Date()
-        };
-        
-        updateSession(finalSession);
-      } 
-      else if (response.type === "tool_calls") {
-        const toolCalls = response.tool_calls as ToolCall[];
-        
-        const toolCallsMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "I need to get some information to answer that properly.",
-          isUser: false,
-          timestamp: new Date(),
-          toolCalls: toolCalls
-        };
-        
-        let currentToolSession = {
-          ...updatedSession,
-          messages: [...updatedMessages, toolCallsMessage],
-          updatedAt: new Date()
-        };
-        
-        updateSession(currentToolSession);
-        
-        const assistantMessage: ChatMessage = {
-          role: "assistant",
-          content: "",
-          tool_call_id: toolCalls[0].id
-        };
-        
-        const updatedChatMessagesWithAssistant = [...updatedChatMessages, assistantMessage];
-        
-        for (const toolCall of toolCalls) {
-          if (toolCall.type === "function") {
-            const functionName = toolCall.function.name;
-            const args = JSON.parse(toolCall.function.arguments);
-            
-            const executingMessage: Message = {
-              id: (Date.now() + 2).toString(),
-              content: `Executing ${functionName}...`,
-              isUser: false,
-              timestamp: new Date()
-            };
-            
-            currentToolSession = {
-              ...currentToolSession,
-              messages: [...currentToolSession.messages, executingMessage],
-              updatedAt: new Date()
-            };
-            
-            updateSession(currentToolSession);
-            
-            const result = await executeFunction(functionName, args);
-            
-            const toolResultMessage: ChatMessage = {
-              role: "tool",
-              tool_call_id: toolCall.id,
-              content: result
-            };
-            
-            const withToolResult = [...updatedChatMessagesWithAssistant, toolResultMessage];
-            
-            const finalResponse = await callOpenAI([
-              ...updatedChatMessages,
-              assistantMessage,
-              toolResultMessage
-            ]);
-            
-            if (finalResponse.type === "content") {
-              const finalMessage: Message = {
-                id: (Date.now() + 3).toString(),
-                content: finalResponse.content,
-                isUser: false,
-                timestamp: new Date()
-              };
-              
-              const messagesWithoutExecuting = currentToolSession.messages.filter(
-                m => m.id !== executingMessage.id
-              );
-              
-              const finalChatMessage: ChatMessage = {
-                role: "assistant",
-                content: finalResponse.content
-              };
-              
-              const finalSession = {
-                ...currentToolSession,
-                messages: [...messagesWithoutExecuting, finalMessage],
-                chatMessages: [...withToolResult, finalChatMessage],
-                title: updatedMessages.length === 1 ? content.substring(0, 30) : currentToolSession.title,
-                updatedAt: new Date()
-              };
-              
-              updateSession(finalSession);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error in AI response:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "Sorry, I encountered an error. Please try again later.",
-        isUser: false,
-        timestamp: new Date()
-      };
-      
-      const errorSession = {
-        ...updatedSession,
-        messages: [...updatedMessages, errorMessage],
-        updatedAt: new Date()
-      };
-      
-      updateSession(errorSession);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-  
-  const handleNewChat = () => {
-    navigate('/new');
-  };
+  const { 
+    session, 
+    isTyping, 
+    handleSendMessage, 
+    handleNewChat 
+  } = useChatSession({ 
+    sessionId, 
+    isNew 
+  });
   
   if (!session) {
     return <div className="h-screen flex items-center justify-center">Loading...</div>;
@@ -340,50 +92,10 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
               {session.messages.length === 0 ? (
                 <WelcomeScreen onSendMessage={handleSendMessage} />
               ) : (
-                <div className="space-y-5 sm:space-y-6">
-                  {session.messages.map((message, index) => (
-                    <div 
-                      key={message.id}
-                      className={cn(
-                        "flex",
-                        message.isUser ? "justify-end" : "justify-start"
-                      )}
-                    >
-                      <MessageBubble 
-                        isUser={message.isUser}
-                        animationDelay={index * 100}
-                      >
-                        {message.content}
-                        {message.toolCalls && (
-                          <div className="mt-2 text-xs opacity-75">
-                            <div className="font-semibold">Using tools:</div>
-                            <ul className="list-disc pl-4">
-                              {message.toolCalls.map(tool => (
-                                <li key={tool.id}>
-                                  {tool.function.name}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </MessageBubble>
-                    </div>
-                  ))}
-                  
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <MessageBubble isLoading>
-                        <div className="flex space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                        </div>
-                      </MessageBubble>
-                    </div>
-                  )}
-                  
-                  <div ref={messagesEndRef} />
-                </div>
+                <MessageList 
+                  messages={session.messages} 
+                  isTyping={isTyping} 
+                />
               )}
             </div>
           </main>
@@ -401,27 +113,6 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
         </div>
       </div>
     </SidebarProvider>
-  );
-};
-
-const WelcomeScreen = ({ 
-  onSendMessage
-}: { 
-  onSendMessage: (message: string) => void
-}) => {
-  return (
-    <div className="h-full flex flex-col items-center justify-center py-12">
-      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-8 sm:mb-12 animate-fade-in">
-        What can I help with?
-      </h1>
-      
-      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-        <ChatInput 
-          onSendMessage={onSendMessage} 
-          className="animate-fade-in"
-        />
-      </div>
-    </div>
   );
 };
 
