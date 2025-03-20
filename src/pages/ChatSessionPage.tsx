@@ -40,26 +40,9 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Load or create a chat session on mount
+  // Load existing session on mount if not new
   useEffect(() => {
-    if (isNew) {
-      const newSessionId = uuidv4();
-      const newSession: ChatSession = {
-        id: newSessionId,
-        title: "New Chat",
-        messages: [],
-        chatMessages: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      // Save new session to localStorage
-      const sessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
-      localStorage.setItem('chatSessions', JSON.stringify([...sessions, newSession]));
-      
-      setSession(newSession);
-      navigate(`/chat/${newSessionId}`, { replace: true });
-    } else if (sessionId) {
+    if (!isNew && sessionId) {
       // Load existing session
       const sessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
       const foundSession = sessions.find((s: ChatSession) => s.id === sessionId);
@@ -70,6 +53,17 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
         // Session not found, redirect to home
         navigate('/');
       }
+    } else if (isNew) {
+      // For new sessions, we just set a temporary placeholder
+      // The actual session will be created when the user sends their first message
+      setSession({
+        id: "temp-id",
+        title: "New Chat",
+        messages: [],
+        chatMessages: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
     }
   }, [isNew, sessionId, navigate]);
   
@@ -87,11 +81,30 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
       s.id === updatedSession.id ? updatedSession : s
     );
     
+    if (!sessions.some((s: ChatSession) => s.id === updatedSession.id)) {
+      updatedSessions.push(updatedSession);
+    }
+    
     localStorage.setItem('chatSessions', JSON.stringify(updatedSessions));
   };
   
   const handleSendMessage = async (content: string) => {
     if (!session) return;
+    
+    // If this is a new session (temp-id), create a real session first
+    let currentSession = session;
+    if (isNew && session.id === "temp-id") {
+      const newSessionId = uuidv4();
+      currentSession = {
+        ...session,
+        id: newSessionId,
+        title: content.substring(0, 30),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      // Update URL without reloading
+      navigate(`/chat/${newSessionId}`, { replace: true });
+    }
     
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -105,12 +118,12 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
       content: content
     };
     
-    const updatedMessages = [...session.messages, userMessage];
-    const updatedChatMessages = [...session.chatMessages, userChatMessage];
+    const updatedMessages = [...currentSession.messages, userMessage];
+    const updatedChatMessages = [...currentSession.chatMessages, userChatMessage];
     
     // Update session
     const updatedSession = {
-      ...session,
+      ...currentSession,
       messages: updatedMessages,
       chatMessages: updatedChatMessages,
       updatedAt: new Date()
@@ -156,13 +169,13 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
           toolCalls: toolCalls
         };
         
-        let currentSession = {
+        let currentToolSession = {
           ...updatedSession,
           messages: [...updatedMessages, toolCallsMessage],
           updatedAt: new Date()
         };
         
-        updateSession(currentSession);
+        updateSession(currentToolSession);
         
         const assistantMessage: ChatMessage = {
           role: "assistant",
@@ -184,13 +197,13 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
               timestamp: new Date()
             };
             
-            currentSession = {
-              ...currentSession,
-              messages: [...currentSession.messages, executingMessage],
+            currentToolSession = {
+              ...currentToolSession,
+              messages: [...currentToolSession.messages, executingMessage],
               updatedAt: new Date()
             };
             
-            updateSession(currentSession);
+            updateSession(currentToolSession);
             
             const result = await executeFunction(functionName, args);
             
@@ -216,7 +229,7 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
                 timestamp: new Date()
               };
               
-              const messagesWithoutExecuting = currentSession.messages.filter(
+              const messagesWithoutExecuting = currentToolSession.messages.filter(
                 m => m.id !== executingMessage.id
               );
               
@@ -226,10 +239,10 @@ const ChatSessionPage = ({ isNew = false }: ChatSessionPageProps) => {
               };
               
               const finalSession = {
-                ...currentSession,
+                ...currentToolSession,
                 messages: [...messagesWithoutExecuting, finalMessage],
                 chatMessages: [...withToolResult, finalChatMessage],
-                title: updatedMessages.length === 1 ? content.substring(0, 30) : currentSession.title,
+                title: updatedMessages.length === 1 ? content.substring(0, 30) : currentToolSession.title,
                 updatedAt: new Date()
               };
               
