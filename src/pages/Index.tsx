@@ -6,7 +6,7 @@ import MessageBubble from "@/components/MessageBubble";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
+import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle, Sparkles } from "lucide-react";
 
 type Message = {
   id: string;
@@ -41,9 +41,24 @@ const Index = () => {
     setIsTyping(true);
     
     setTimeout(() => {
+      const fortunes = [
+        "The stars align in your favor. Great fortune awaits you in the coming days.",
+        "A journey of a thousand miles begins with a single step. Your path will soon become clear.",
+        "Your destiny is written in the stars, but you hold the pen to rewrite it.",
+        "The universe whispers secrets to those who listen. Be still and hear its guidance.",
+        "A surprising opportunity will present itself when you least expect it.",
+        "Your spirit guide is trying to contact you. Pay attention to recurring symbols.",
+        "Trust your intuition in matters of the heart. It knows more than your mind.",
+        "The energy around you is shifting. Prepare for transformation and renewal.",
+        "Ancient wisdom suggests patience in your current situation. All will be revealed in time.",
+        "The mystic forces indicate a powerful connection with someone from your past."
+      ];
+      
+      const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+      
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I'm an AI assistant designed to provide helpful, accurate, and ethical responses. How can I assist you today?",
+        content: randomFortune,
         isUser: false,
         timestamp: new Date()
       };
@@ -55,31 +70,31 @@ const Index = () => {
   
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex h-screen w-full overflow-hidden bg-chat-dark">
+      <div className="flex h-screen w-full overflow-hidden bg-purple-950">
         <Sidebar variant="floating">
           <SidebarHeader>
             <div className="px-3 py-2">
               <button 
                 onClick={() => {}} 
-                className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
+                className="w-full flex items-center gap-2 bg-purple-600 hover:bg-purple-500 transition-colors rounded-md px-3 py-2 text-white"
               >
                 <PlusCircle size={16} />
-                <span>New Chat</span>
+                <span>New Reading</span>
               </button>
             </div>
           </SidebarHeader>
           <SidebarContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Chats" isActive={true}>
+                <SidebarMenuButton tooltip="Readings" isActive={true}>
                   <MessageSquare />
-                  <span>Chats</span>
+                  <span>Readings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Community">
+                <SidebarMenuButton tooltip="Mystic Community">
                   <Users />
-                  <span>Community</span>
+                  <span>Mystic Community</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
@@ -105,7 +120,7 @@ const Index = () => {
           </SidebarFooter>
         </Sidebar>
         
-        <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark w-full max-w-full">
+        <div className="flex flex-col flex-1 overflow-hidden bg-purple-950 w-full max-w-full">
           <ChatHeader />
           
           <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 hide-scrollbar">
@@ -150,13 +165,13 @@ const Index = () => {
           </main>
           
           {showFooterInput && (
-            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent sticky bottom-0 z-10">
+            <footer className="p-4 pb-6 bg-gradient-to-t from-purple-950 to-transparent sticky bottom-0 z-10">
               <div className="max-w-5xl mx-auto w-full">
                 <ChatInput onSendMessage={handleSendMessage} />
                 
-                <div className="mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+                <div className="mt-3 text-center text-xs text-purple-300 flex items-center justify-center gap-1">
                   <AlertTriangle size={12} />
-                  <span>ChatGPT can make mistakes. Check important info.</span>
+                  <span>OngphraAI offers mystical guidance, not concrete predictions.</span>
                 </div>
               </div>
             </footer>
@@ -174,9 +189,15 @@ const WelcomeScreen = ({
 }) => {
   return (
     <div className="h-full flex flex-col items-center justify-center py-12">
-      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-8 sm:mb-12 animate-fade-in">
-        What can I help with?
+      <div className="mb-6 flex items-center justify-center">
+        <Sparkles className="text-purple-400 w-10 h-10" />
+      </div>
+      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-4 sm:mb-6 animate-fade-in text-center">
+        What does your future hold?
       </h1>
+      <p className="text-purple-300 mb-8 text-center max-w-lg mx-auto animate-fade-in">
+        Ask OngphraAI about your destiny, relationships, career, or any guidance you seek.
+      </p>
       
       <div className="w-full max-w-3xl mx-auto px-4 sm:px-0">
         <ChatInput 

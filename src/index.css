@@ -82,7 +82,7 @@
   }
 
   body {
-    @apply bg-chat-dark text-foreground antialiased;
+    @apply bg-purple-950 text-foreground antialiased;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
   }
 
