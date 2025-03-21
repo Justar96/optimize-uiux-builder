@@ -70,13 +70,13 @@ const Index = () => {
   
   return (
     <SidebarProvider defaultOpen={false}>
-      <div className="flex h-screen w-full overflow-hidden bg-purple-950">
+      <div className="flex h-screen w-full overflow-hidden bg-slate-900">
         <Sidebar variant="floating">
           <SidebarHeader>
             <div className="px-3 py-2">
               <button 
                 onClick={() => {}} 
-                className="w-full flex items-center gap-2 bg-purple-600 hover:bg-purple-500 transition-colors rounded-md px-3 py-2 text-white"
+                className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
               >
                 <PlusCircle size={16} />
                 <span>New Reading</span>
@@ -120,7 +120,7 @@ const Index = () => {
           </SidebarFooter>
         </Sidebar>
         
-        <div className="flex flex-col flex-1 overflow-hidden bg-purple-950 w-full max-w-full">
+        <div className="flex flex-col flex-1 overflow-hidden bg-slate-900 w-full max-w-full">
           <ChatHeader />
           
           <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 hide-scrollbar">
@@ -165,11 +165,11 @@ const Index = () => {
           </main>
           
           {showFooterInput && (
-            <footer className="p-4 pb-6 bg-gradient-to-t from-purple-950 to-transparent sticky bottom-0 z-10">
+            <footer className="p-4 pb-6 bg-gradient-to-t from-slate-900 to-transparent sticky bottom-0 z-10">
               <div className="max-w-5xl mx-auto w-full">
                 <ChatInput onSendMessage={handleSendMessage} />
                 
-                <div className="mt-3 text-center text-xs text-purple-300 flex items-center justify-center gap-1">
+                <div className="mt-3 text-center text-xs text-gray-300 flex items-center justify-center gap-1">
                   <AlertTriangle size={12} />
                   <span>OngphraAI offers mystical guidance, not concrete predictions.</span>
                 </div>
@@ -190,12 +190,12 @@ const WelcomeScreen = ({
   return (
     <div className="h-full flex flex-col items-center justify-center py-12">
       <div className="mb-6 flex items-center justify-center">
-        <Sparkles className="text-purple-400 w-10 h-10" />
+        <Sparkles className="text-blue-400 w-10 h-10" />
       </div>
       <h1 className="text-3xl sm:text-4xl font-medium text-white mb-4 sm:mb-6 animate-fade-in text-center">
         What does your future hold?
       </h1>
-      <p className="text-purple-300 mb-8 text-center max-w-lg mx-auto animate-fade-in">
+      <p className="text-gray-300 mb-8 text-center max-w-lg mx-auto animate-fade-in">
         Ask OngphraAI about your destiny, relationships, career, or any guidance you seek.
       </p>
       

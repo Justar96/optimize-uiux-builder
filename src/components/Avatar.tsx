@@ -12,7 +12,7 @@ interface AvatarProps {
 
 const Avatar = ({ 
   initial = "A", 
-  color = "bg-purple-600", 
+  color = "bg-blue-600", 
   size = "md",
   className,
   animationDelay
