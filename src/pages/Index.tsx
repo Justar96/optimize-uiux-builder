@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import ChatHeader from "@/components/ChatHeader";
 import ChatInput from "@/components/ChatInput";
@@ -177,7 +178,7 @@ const WelcomeScreen = ({
         What can I help with?
       </h1>
       
-      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+      <div className="w-full max-w-3xl mx-auto px-4 sm:px-0">
         <ChatInput 
           onSendMessage={onSendMessage} 
           className="animate-fade-in"
