@@ -1,44 +1,55 @@
-
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import ChatHeader from "@/components/ChatHeader";
+import ChatInput from "@/components/ChatInput";
+import MessageBubble from "@/components/MessageBubble";
+import { AlertTriangle } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { MessageSquare, Settings, Users, Moon, Sun, PlusCircle } from "lucide-react";
-import { useState } from "react";
 
-type ChatSession = {
+type Message = {
   id: string;
-  title: string;
-  updatedAt: Date;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
 };
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showFooterInput, setShowFooterInput] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // If no sessions, redirect to new chat page
-    const storedSessions = JSON.parse(localStorage.getItem('chatSessions') || '[]');
-    
-    if (storedSessions.length === 0) {
-      navigate('/new');
-      return;
-    }
-    
-    // Sort sessions by updatedAt (most recent first)
-    const sortedSessions = [...storedSessions].sort((a: any, b: any) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
-    
-    setSessions(sortedSessions);
-  }, [navigate]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isTyping]);
   
-  const handleNewChat = () => {
-    navigate('/new');
-  };
-  
-  const handleOpenChat = (sessionId: string) => {
-    navigate(`/chat/${sessionId}`);
+  const handleSendMessage = (content: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content,
+      isUser: true,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    
+    setShowFooterInput(true);
+    
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I'm an AI assistant designed to provide helpful, accurate, and ethical responses. How can I assist you today?",
+        isUser: false,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
+    }, 1500);
   };
   
   return (
@@ -48,7 +59,7 @@ const Index = () => {
           <SidebarHeader>
             <div className="px-3 py-2">
               <button 
-                onClick={handleNewChat} 
+                onClick={() => {}} 
                 className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
               >
                 <PlusCircle size={16} />
@@ -94,51 +105,85 @@ const Index = () => {
         </Sidebar>
         
         <div className="flex flex-col flex-1 overflow-hidden bg-chat-dark w-full max-w-full">
-          <header className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h1 className="text-xl text-white font-medium">Your Conversations</h1>
-            <button 
-              onClick={handleNewChat}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-3 py-2 text-white"
-            >
-              <PlusCircle size={16} />
-              <span>New Chat</span>
-            </button>
-          </header>
+          <ChatHeader />
           
-          <main className="flex-1 overflow-y-auto p-4">
-            <div className="max-w-4xl mx-auto">
-              {sessions.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">No conversations yet</p>
-                  <button 
-                    onClick={handleNewChat}
-                    className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 transition-colors rounded-md px-4 py-2 text-white"
-                  >
-                    <PlusCircle size={18} />
-                    <span>Start a New Chat</span>
-                  </button>
-                </div>
+          <main className="flex-1 overflow-y-auto px-4 py-6 sm:py-8 hide-scrollbar">
+            <div className="max-w-5xl mx-auto w-full">
+              {messages.length === 0 ? (
+                <WelcomeScreen onSendMessage={handleSendMessage} />
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {sessions.map((session) => (
+                <div className="space-y-5 sm:space-y-6">
+                  {messages.map((message, index) => (
                     <div 
-                      key={session.id} 
-                      className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition-colors"
-                      onClick={() => handleOpenChat(session.id)}
+                      key={message.id}
+                      className={cn(
+                        "flex",
+                        message.isUser ? "justify-end" : "justify-start"
+                      )}
                     >
-                      <h3 className="text-white font-medium mb-2 truncate">{session.title}</h3>
-                      <p className="text-gray-400 text-sm">
-                        {new Date(session.updatedAt).toLocaleString()}
-                      </p>
+                      <MessageBubble 
+                        isUser={message.isUser}
+                        animationDelay={index * 100}
+                      >
+                        {message.content}
+                      </MessageBubble>
                     </div>
                   ))}
+                  
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <MessageBubble isLoading>
+                        <div className="flex space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </MessageBubble>
+                    </div>
+                  )}
+                  
+                  <div ref={messagesEndRef} />
                 </div>
               )}
             </div>
           </main>
+          
+          {showFooterInput && (
+            <footer className="p-4 pb-6 bg-gradient-to-t from-chat-dark to-transparent sticky bottom-0 z-10">
+              <div className="max-w-5xl mx-auto w-full">
+                <ChatInput onSendMessage={handleSendMessage} />
+                
+                <div className="mt-3 text-center text-xs text-gray-500 flex items-center justify-center gap-1">
+                  <AlertTriangle size={12} />
+                  <span>ChatGPT can make mistakes. Check important info.</span>
+                </div>
+              </div>
+            </footer>
+          )}
         </div>
       </div>
     </SidebarProvider>
+  );
+};
+
+const WelcomeScreen = ({ 
+  onSendMessage
+}: { 
+  onSendMessage: (message: string) => void
+}) => {
+  return (
+    <div className="h-full flex flex-col items-center justify-center py-12">
+      <h1 className="text-3xl sm:text-4xl font-medium text-white mb-8 sm:mb-12 animate-fade-in">
+        What can I help with?
+      </h1>
+      
+      <div className="w-full max-w-md mx-auto px-4 sm:px-0">
+        <ChatInput 
+          onSendMessage={onSendMessage} 
+          className="animate-fade-in"
+        />
+      </div>
+    </div>
   );
 };
 

@@ -1,20 +1,13 @@
 
-import { Globe, Search, Sparkles, CloudSun } from "lucide-react";
+import { Globe, Search, Sparkles } from "lucide-react";
 import ChipButton from "./ChipButton";
 import { cn } from "@/lib/utils";
 
 interface OptionsPanelProps {
   className?: string;
-  onSuggestionClick?: (suggestion: string) => void;
 }
 
-const OptionsPanel = ({ className, onSuggestionClick }: OptionsPanelProps) => {
-  const handleClick = (suggestion: string) => {
-    if (onSuggestionClick) {
-      onSuggestionClick(suggestion);
-    }
-  };
-  
+const OptionsPanel = ({ className }: OptionsPanelProps) => {
   return (
     <div 
       className={cn(
@@ -25,7 +18,6 @@ const OptionsPanel = ({ className, onSuggestionClick }: OptionsPanelProps) => {
       <ChipButton 
         icon={<Search size={16} />}
         animationDelay={100}
-        onClick={() => handleClick("Search for information about artificial intelligence")}
       >
         Search
       </ChipButton>
@@ -33,17 +25,8 @@ const OptionsPanel = ({ className, onSuggestionClick }: OptionsPanelProps) => {
       <ChipButton 
         icon={<Sparkles size={16} />}
         animationDelay={150}
-        onClick={() => handleClick("Find information about machine learning")}
       >
         Deep research
-      </ChipButton>
-      
-      <ChipButton 
-        icon={<CloudSun size={16} />}
-        animationDelay={175}
-        onClick={() => handleClick("What's the weather like in Paris today?")}
-      >
-        Weather
       </ChipButton>
       
       <ChipButton 
@@ -51,7 +34,6 @@ const OptionsPanel = ({ className, onSuggestionClick }: OptionsPanelProps) => {
         variant="ghost"
         animationDelay={200}
         className="opacity-60 hover:opacity-100"
-        onClick={() => handleClick("Tell me about the latest tech news")}
       >
         Web browsing
       </ChipButton>
